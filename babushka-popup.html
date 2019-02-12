@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bistro Babushka</title>
+    
+
+
+    <style>
+        
+        *{
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .menuramme {
+            border: 1px solid black;
+            padding: 1rem;
+            line-height: 1.8;
+        
+            
+        }
+        
+        .menuramme:nth-child(even){
+            background-color: #ccc; 
+        }
+        
+        .menu button{
+    padding: 5px;
+    margin: 5px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+        
+
+        #liste {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            margin: 1rem;
+            grid-gap: 2rem;
+            
+           
+        }
+        
+          .valgt {
+            background-color: tomato;
+        }
+        
+         .menu{
+            text-align: center;
+            
+        }
+        
+          #popup {
+            top: 0;
+            width: 100vw;
+            height: 100vw;
+            position: fixed;
+            display: none;
+            background-color: hsla(0, 15%, 48%, 0.5);
+        }
+
+        #indhold {
+            min-height: 30vw;
+            background-color: white;
+            width: 50vw;
+            margin: 2rem auto;
+            overflow: scroll;
+        }
+
+        #luk {
+            position: fixed;
+            right: 2rem;
+        }
+
+        #luk button {
+            font-size: 3rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+    margin: 30px;
+            margin-right: 5vw;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+            background-color: white;
+            color: darkorange;
+        }
+
+        
+        
+        img{
+            width: 100%;
+
+
+        }
+        
+        h1{
+            padding: 1rem;
+        }
+        
+        #indhold img {
+            height: 90%
+        }
+        
+        footer section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 10px;
+    text-align: center;
+        }
+       
+        
+        footer{
+    background: #666;
+    color: #ddd;
+        }
+        
+        header {
+            background-color: darkorange;
+        }
+        
+      
+
+        @media only screen and (min-width:600px) {
+            #liste {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media only screen and (min-width:768px) {
+            #liste {
+                grid-template-columns: repeat(3, 1fr);
+
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+<div id="popup">
+        <div id="luk">
+            <button>X</button>
+        </div>
+        <div id="indhold"></div>
+    </div>
+    
+<header><img src="imgs/red_star.svg" alt="logo"></header>
+   
+   <nav>
+       <div class="menu">
+           <button class="filter valgt" data-kategori="alle">Alle</button>
+           <button class="filter" data-kategori="forretter">Forretter</button>
+           <button class="filter" data-kategori="hovedretter">Hovedretter</button>
+           <button class="filter" data-kategori="desserter">Desserter</button>
+           <button class="filter" data-kategori="drikkevarer">Drikkevarer</button>
+           <button class="filter" data-kategori="sideorders">Side orders</button>
+       </div>
+   </nav>
+   
+   <section id="menu-container">
+   
+   <h1>Alle</h1>
+    <div id="liste">
+
+    </div>
+    
+    </section>
+<footer>
+    <section>
+    <adress>
+    Adresse: <br>Grønnegade 97 <br> 1234 København K
+    </adress>
+    
+    <aside>
+Åbningstider:<br>
+Mandag – fredag 10:30 – 22:00<br>
+    Lørdag 12:00 – 23:00
+    </aside>
+    </section>
+</footer>
+    <script>
+        
+
+
+  
+        document.addEventListener("DOMContentLoaded", start);
+        
+        let alleRetter = [];
+        let filter="alle";
+        const dest=document.querySelector("#liste");
+        
+        async function start(){
+            const myJson = await fetch("https://mandalskeawebspace.dk/claude_php/clean_up_spreadsheet.php?id=1jxxxFoWBuMJ1qhQ9BQIAyKHmP38XtAF9_sQr0xo5JLo");
+            alleRetter = await myJson.json();
+            alleRetter.sort((a,b)=>{return a.navn.localeCompare(b.navn);});
+            visRet();
+        }
+        
+        function visRet() {
+              dest.innerHTML="";
+                    alleRetter.forEach(ret => {
+                        if(filter=="alle"||filter==ret.kategori){
+                        let template = ` <div class="menuramme"> <img src=imgs/small/${ret.billede}-sm.jpg alt=${ret.navn}>
+    <h2>${ret.navn}</h2> <p>${ret.kort}</p> <p>Pris: ${ret.pris},- </p> </div>`;
+                        dest.insertAdjacentHTML("beforeend", template);
+                    dest.lastElementChild.addEventListener("click", ()=>{visSingle(ret);} );
+                    
+                    function visSingle(ret){/*Lavet af Simon Christiansen*/
+                    document.querySelector("#indhold").innerHTML=`
+                    <div class="menuramme"> <img src=imgs/large/${ret.billede}.jpg alt=${ret.navn}>
+    <h2>${ret.navn}</h2> <p>${ret.lang}</p> <p>Pris: ${ret.pris},- </p> </div>`;document.querySelector("#popup").style.display="block";
+                    document.querySelector("#popup #luk").addEventListener("click", close);
+                    }      
+                    function close(){
+                        document.querySelector("#popup").style.display="none";}
+                    }
+                        })
+                    }
+
+
+        
+        document.querySelectorAll(".filter").forEach(elm=>{elm.addEventListener("click", filtrering);})
+        
+        
+        
+        function filtrering(){
+            filter=this.getAttribute("data-kategori");
+            document.querySelector("h1").textContent=this.textContent;
+            document.querySelectorAll(".filter").forEach(elm=> {elm.classList.remove("valgt");})
+            this.classList.add("valgt");
+            visRet();
+        }
+        start();
+        
+        console.log("Lavet af Simon Christiansen")
+    </script>
+</body>
+
+</html>
